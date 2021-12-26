@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import {ElementRef, Injectable, NgZone, OnDestroy} from '@angular/core';
+import * as dat from 'dat.gui';
+import {ElementRef, Injectable, NgZone, OnDestroy, OnInit} from '@angular/core';
 
 @Injectable({providedIn: 'root'})
 export class EngineService implements OnDestroy {
@@ -8,9 +9,14 @@ export class EngineService implements OnDestroy {
   private camera: THREE.PerspectiveCamera;
   private scene: THREE.Scene;
   private light: THREE.AmbientLight;
-
+  private gui: any;
   private cube: THREE.Mesh;
-
+  private cameraFolder: any;
+  private cameraPos: any = {
+    x: 0, 
+    y: 0, 
+    z: 5
+  }
   private frameId: number = null;
 
   public constructor(private ngZone: NgZone) {
@@ -22,9 +28,25 @@ export class EngineService implements OnDestroy {
     }
   }
 
+  public ngOnInit(){
+
+  }
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     // The first step is to get the reference of the canvas element from our HTML document
     this.canvas = canvas.nativeElement;
+
+    // create a gui element 
+    this.gui = new dat.GUI();
+    this.cameraFolder = this.gui.addFolder('Camera-position');
+
+
+    this.cameraFolder.add(this.cameraPos, "x" , -1, 1).name("x");
+    this.cameraFolder.add(this.cameraPos,"y" ,  -1, 1).name("y");
+    this.cameraFolder.add(this.cameraPos,"z" ,  0, 5).name("z");
+    // this.cameraFOlder.open();
+
+    // this.gui.remember(this.cubeDimentions);
+
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
@@ -76,9 +98,9 @@ export class EngineService implements OnDestroy {
     this.frameId = requestAnimationFrame(() => {
       this.render();
     });
-
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
+    this.camera.position.set(this.cameraPos.x, this.cameraPos.y, this.cameraPos.z);
     this.renderer.render(this.scene, this.camera);
   }
 
